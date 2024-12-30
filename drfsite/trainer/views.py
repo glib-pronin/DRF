@@ -9,6 +9,7 @@ from .permissions import IsAdminOrReadOnly
 from django.contrib.auth.models import User
 from rest_framework.permissions import  IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
+from django.contrib.auth import login
 
 class TrainerPagination(LimitOffsetPagination):
     default_limit = 2  
@@ -16,10 +17,13 @@ class TrainerPagination(LimitOffsetPagination):
 
 
 class UserAPICreate(generics.ListCreateAPIView):
-     queryset= User.objects.all()
+     queryset = User.objects.all()
      serializer_class = UserSerializers
-     permission_classes = ( IsAuthenticatedOrReadOnly,  )
-     pagination_class = TrainerPagination
+
+     def perform_create(self, serializer):
+          user = serializer.save()
+          login(self.request, user)
+     
 
 class TrainerAPIList(generics.ListCreateAPIView):
      queryset= Trainer.objects.all()
